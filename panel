@@ -1,0 +1,122 @@
+using System.Windows.Forms;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using Memory;
+using System.Diagnostics;
+using System.ComponentModel;
+using System.Data;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+
+namespace ideapro_30
+{
+    public partial class huongdan : Form
+    {
+        public huongdan()
+        {
+            InitializeComponent();
+        }
+        public static bool IsAlreadyRunning = false;
+        public bool hide = true;
+
+        private static Mem Memory = new Mem();
+
+        protected override void WndProc(ref Message message)
+        {
+            if (message.Msg == 0x0312)
+            {
+
+                int id = message.WParam.ToInt32();
+
+                switch (id)
+                {
+
+                    case 1:
+                        if (hide == true)
+                        {
+                            hide = false;
+                            this.Show();
+                        }
+                        else
+                        {
+                            hide = true;
+                            this.Hide();
+                        }
+                        break;
+                }
+            }
+
+
+            base.WndProc(ref message);
+
+        }
+
+        [DllImport("user32.dll")]
+        public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
+
+        public async void Rep(string scan, string rep)
+        {
+            IsAlreadyRunning = true;
+            if (!Memory.OpenProcess("HD-Player.exe"))
+            {
+                THANHDIEUTV.Text = "Please enter the emulator !";
+                THANHDIEUTV.ForeColor = Color.Red;
+                return;
+            }
+            THANHDIEUTV.Text = "Running Code...";
+            THANHDIEUTV.ForeColor = Color.Yellow;
+
+            IEnumerable<long> source = await Memory.AoBScan(0L, 2533274790395904L, scan, writable: true);
+            if (source.Count() != 0)
+            {
+                for (int i = 0; i < source.Count(); i++)
+                {
+
+
+                    Memory.WriteMemory(source.ElementAt(i).ToString("X"), "bytes", rep);
+
+                }
+                THANHDIEUTV.Text = "Hack Activated";
+                THANHDIEUTV.ForeColor = Color.Green;
+                await Task.Delay(2000);
+
+            }
+            else
+            {
+                THANHDIEUTV.Text = "Hack Failed";
+                THANHDIEUTV.ForeColor = Color.Red;
+
+            }
+            Memory.CloseProcess();
+            IsAlreadyRunning = false;
+        }
+
+        private void huongdan_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void siticoneGradientButton14_Click(object sender, EventArgs e)
+        {
+            THANHDIEUTV.Text = "Bypass Emulator X32 True";
+            Rep("0A 00 A0 E3 5D 6A E5 EB 00 50 A0 E1 90 00 9F E5", "00 00 00 E3 5D 6A E5 EB 00 50 A0 E1 90 00 9F E5");
+
+        }
+
+        private void siticoneGradientButton1_Click(object sender, EventArgs e)
+        {
+            THANHDIEUTV.Text = "Bypass Emulator X64 True";
+            Rep("A8 00 9F E5 00 20 A0 E3 00 00 9F E7 00 10 90 E5 0A 00 A0 E3", "A8 00 9F E5 00 20 A0 E3 00 00 9F E7 00 10 90 E5 00 00 00 E3");
+        }
+
+        private void siticoneGradientButton2_Click(object sender, EventArgs e)
+        {
+            THANHDIEUTV.Text = "Error Bypass Rank, Please Update Panel Version 5";
+        }
+    }
+}
